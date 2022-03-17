@@ -16,11 +16,47 @@ public class Cannon : MonoBehaviour
 
     [SerializeField] private float distanceRay = 10f;
 
-    void Start()
-    {
+    [SerializeField] GameObject[] waypoints;
+    [SerializeField] private bool isActivate = true;
 
+    private void Start()
+    {
+        StartCoroutine(RotateBehaviour());
+        StartCoroutine(WaypointsBehavior());
     }
 
+    IEnumerator RotateBehaviour()
+    {
+
+        /*
+        transform.Rotate(0f, 45f, 0f);
+        yield return new WaitForSeconds(2f);
+        transform.Rotate(0f, 45f, 0f);
+        yield return new WaitForSeconds(2f);
+        transform.Rotate(0f, 45f, 0f);
+        */
+        while (isActivate)
+        {
+            for (int i = 0; i < 4; i++)
+            {
+                yield return new WaitForSeconds(1f);
+                transform.Rotate(0f, 90f, 0f);
+            }
+        }
+    }
+
+    IEnumerator WaypointsBehavior()
+    {
+        for (int i = 0; i < waypoints.Length; ++i)
+        {
+            while (transform.position != waypoints[i].transform.position)
+            {
+                yield return null;
+                transform.position = Vector3.MoveTowards(transform.position, waypoints[i].transform.position, 10f * Time.deltaTime);
+            }
+            yield return new WaitForSeconds(3f);
+        }
+    }
     // Update is called once per frame
     void Update()
     {
@@ -33,30 +69,41 @@ public class Cannon : MonoBehaviour
             timeShoot += Time.deltaTime;
         }
 
-        if(timeShoot > shootCooldown){
+        if (timeShoot > shootCooldown)
+        {
             canShoot = true;
         }
-    }
+     }
 
     private void emitirRaycast()
     {
         RaycastHit hit;
 
-        if(Physics.Raycast(shootOrigen.transform.position, shootOrigen.transform.TransformDirection(Vector3.forward), out hit, distanceRay)){
-            if(hit.transform.tag == "Player"){
+        if (Physics.Raycast(shootOrigen.transform.position, shootOrigen.transform.TransformDirection(Vector3.forward), out hit, distanceRay))
+        {
+            if (hit.transform.tag == "Player")
+            {
                 canShoot = false;
                 timeShoot = 0;
                 GameObject b = Instantiate(bulletPrefab, shootOrigen.transform.position, bulletPrefab.transform.rotation);
-                b.GetComponent<Rigidbody>().AddForce(shootOrigen.transform.TransformDirection(Vector3.forward) *10f, ForceMode.Impulse);
+                b.GetComponent<Rigidbody>().AddForce(shootOrigen.transform.TransformDirection(Vector3.forward) * 10f, ForceMode.Impulse);
             }
         }
     }
 
-    private void OnDrawGizmos() {
-        if(canShoot){
+    private void OnDrawGizmos()
+    {
+        if (canShoot)
+        {
             Gizmos.color = Color.blue;
             Vector3 puntob = shootOrigen.transform.TransformDirection(Vector3.forward) * distanceRay;
             Gizmos.DrawRay(shootOrigen.transform.position, puntob);
         }
     }
+
+    public void DiseableCannon()
+    {
+        gameObject.SetActive(false);
+    }
+
 }

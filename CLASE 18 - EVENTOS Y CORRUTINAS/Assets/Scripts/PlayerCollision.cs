@@ -2,14 +2,22 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-
+using System;
 
 public class PlayerCollision : MonoBehaviour
 {
+
     private PlayerMovement pmPlayer;
+
+    [SerializeField] int hitPoints = 3;
+
+    //public static event Action OnDeath;
+    public static event Action<int> OnLivesChange;
+
 
     private void Start() {
         pmPlayer = GetComponent<PlayerMovement>();
+        OnLivesChange?.Invoke(hitPoints);
     }
 
     // Start is called before the first frame update
@@ -19,7 +27,17 @@ public class PlayerCollision : MonoBehaviour
         if (other.gameObject.CompareTag("Enemy"))
         {
            // Debug.Log("GAME OVER");
-            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+           hitPoints--;
+           OnLivesChange?.Invoke(hitPoints);
+           Debug.Log("HP : "+hitPoints);
+           if(hitPoints < 1){
+               Debug.Log("GAME OVER");
+              // OnDeath?.Invoke();  
+               PlayerEvent.OnDeath();
+               Destroy(this);
+               Debug.Log("ENVIAR UNA NOTIFICACION A LOS INTERESADOS QUE ESTOY MUERTO");
+           }
+            //SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
         }
 
         if (other.gameObject.CompareTag("Ground"))

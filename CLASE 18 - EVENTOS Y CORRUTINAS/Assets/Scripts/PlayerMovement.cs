@@ -50,6 +50,9 @@ public class PlayerMovement : MonoBehaviour
             transform.position = svManager.GetSavePoint(GameManager.instance.lastSP).position;
         }
         LoadProfile();
+
+        //PlayerCollision.OnDeath += GameOverBehaviour;
+        PlayerEvent.onDeath += GameOverBehaviour;
     }
 
     public void LoadProfile(){
@@ -227,5 +230,11 @@ public class PlayerMovement : MonoBehaviour
 
     public InventoryManager GetPlayerInventory(){
         return mgInventory;
+    }
+
+    public void GameOverBehaviour(){
+        GetComponent<Rigidbody>().isKinematic = true;        
+        playerAnimator.SetBool("isRun", false);
+        this.enabled = false;
     }
 }
